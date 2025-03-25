@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import 'aboutus_JRBV.dart';
 import 'projects_JRBV.dart';
+import 'main.dart';
 
 class HomePage_JRBV extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Home Page')),
+      appBar: AppBar(
+        title: Text('Flutter Demo'),
+        actions: [
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MaterialApp()),
+                );
+              },
+              child: Text(
+                'Log Out',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
