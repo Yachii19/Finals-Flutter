@@ -1,4 +1,3 @@
-// user_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -66,11 +65,31 @@ class _UserListScreenState extends State<UserListScreen> {
 
   String _getGenderText(String? genderCode) {
     switch (genderCode) {
-      case 'M': return 'Male';
-      case 'F': return 'Female';
-      case 'O': return 'Other';
-      case 'N': return 'Prefer not to say';
-      default: return 'Not specified';
+      case 'M':
+        return 'Male';
+      case 'F':
+        return 'Female';
+      case 'O':
+        return 'Other';
+      case 'N':
+        return 'Prefer not to say';
+      default:
+        return 'Not specified';
+    }
+  }
+
+  Color _getGenderColor(String? genderCode) {
+    switch (genderCode) {
+      case 'M':
+        return Colors.blue;
+      case 'F':
+        return Colors.pink;
+      case 'O':
+        return Colors.purple;
+      case 'N':
+        return Colors.grey;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -79,88 +98,175 @@ class _UserListScreenState extends State<UserListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Users'),
-        elevation: 0,
-        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadUsers,
+          ),
+        ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
           : _error != null
-              ? Center(child: Text(_error!))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        _error!,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadUsers,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
               : _users.isEmpty
-                  ? const Center(child: Text('No users found'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _users.length,
-                      itemBuilder: (context, index) {
-                        final user = _users[index];
-                        return Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.people_outline, size: 48, color: Colors.grey),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No users found',
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _loadUsers,
+                            child: const Text('Refresh'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _loadUsers,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _users.length,
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final user = _users[index];
+                          return Card(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                // Add user detail view functionality
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const CircleAvatar(
-                                      radius: 20,
-                                      child: Icon(Icons.person, size: 20),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    Row(
                                       children: [
-                                        Text(
-                                          user['username'] ?? 'Unknown',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: _getGenderColor(user['gender'])
+                                              .withOpacity(0.2),
+                                          child: Icon(
+                                            Icons.person,
+                                            size: 20,
+                                            color: _getGenderColor(user['gender']),
                                           ),
                                         ),
-                                        Text(
-                                          user['email'] ?? 'No email',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 14,
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                user['username'] ?? 'Unknown',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                user['email'] ?? 'No email',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color: Colors.grey[600],
+                                                    ),
+                                              ),
+                                            ],
                                           ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        Chip(
+                                          avatar: Icon(
+                                            Icons.transgender,
+                                            size: 16,
+                                            color: _getGenderColor(user['gender']),
+                                          ),
+                                          label: Text(
+                                            _getGenderText(user['gender']),
+                                            style: TextStyle(
+                                              color: _getGenderColor(user['gender']),
+                                            ),
+                                          ),
+                                          backgroundColor: _getGenderColor(user['gender'])
+                                              .withOpacity(0.1),
+                                        ),
+                                        if (user['birthday'] != null)
+                                          Chip(
+                                            avatar: const Icon(
+                                              Icons.cake,
+                                              size: 16,
+                                              color: Colors.orange,
+                                            ),
+                                            label: Text(
+                                              DateFormat('MMM dd').format(
+                                                DateTime.tryParse(user['birthday'] ?? '') ??
+                                                    DateTime(2000, 1, 1)),
+                                              style: const TextStyle(
+                                                color: Colors.orange,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.orange.withOpacity(0.1),
+                                          ),
+                                        Chip(
+                                          avatar: const Icon(
+                                            Icons.calendar_today,
+                                            size: 16,
+                                            color: Colors.green,
+                                          ),
+                                          label: Text(
+                                            'Since ${user['registration_date'] != null ? DateFormat('yyyy').format(DateTime.tryParse(user['registration_date']) ?? DateTime(2000, 1, 1)) : 'Unknown'}',
+                                            style: const TextStyle(
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                          backgroundColor: Colors.green.withOpacity(0.1),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 16,
-                                  children: [
-                                    Chip(
-                                      avatar: const Icon(Icons.transgender, size: 16),
-                                      label: Text(_getGenderText(user['gender'])),
-                                      backgroundColor: Colors.blue.withOpacity(0.1),
-                                    ),
-                                    if (user['birthday'] != null)
-                                      Chip(
-                                        avatar: const Icon(Icons.cake, size: 16),
-                                        label: Text(DateFormat('MMM dd').format(
-                                          DateTime.parse(user['birthday']))),
-                                        backgroundColor: Colors.orange.withOpacity(0.1),
-                                      ),
-                                    Chip(
-                                      avatar: const Icon(Icons.calendar_today, size: 16),
-                                      label: Text('Since ${DateFormat('yyyy').format(
-                                        DateTime.parse(user['registration_date']))}'),
-                                      backgroundColor: Colors.green.withOpacity(0.1),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
     );
   }

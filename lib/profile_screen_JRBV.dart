@@ -78,13 +78,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
-        elevation: 0,
-        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        _error!,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadProfile,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
               : _profileData == null
                   ? const Center(child: Text('No profile data'))
                   : SingleChildScrollView(
@@ -92,35 +107,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(16),
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(15),
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: Column(
                               children: [
-                                const CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Colors.blue,
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 50,
-                                    color: Colors.white,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 48,
+                                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                    child: Icon(
+                                      Icons.person,
+                                      size: 48,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   _profileData!['username'] ?? 'N/A',
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   _profileData!['email'] ?? 'N/A',
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.grey[600],
                                   ),
                                 ),
@@ -129,10 +152,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 24),
                           Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
@@ -142,26 +161,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     'Gender',
                                     _getGenderText(_profileData!['gender']),
                                   ),
-                                  const Divider(),
+                                  const Divider(height: 24, thickness: 1),
                                   _buildProfileItem(
                                     Icons.cake,
                                     'Birthday',
                                     _profileData!['birthday'] != null
-                                        ? DateFormat('MMM dd, yyyy').format(
+                                        ? DateFormat('MMMM dd, yyyy').format(
                                             DateTime.parse(_profileData!['birthday']))
                                         : 'Not specified',
                                   ),
-                                  const Divider(),
+                                  const Divider(height: 24, thickness: 1),
                                   _buildProfileItem(
                                     Icons.calendar_today,
                                     'Member since',
                                     _profileData!['registration_date'] != null
-                                        ? DateFormat('MMM dd, yyyy').format(
+                                        ? DateFormat('MMMM dd, yyyy').format(
                                             DateTime.parse(_profileData!['registration_date']))
                                         : 'Not specified',
                                   ),
                                 ],
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                // Add edit profile functionality
+                              },
+                              child: const Text('Edit Profile'),
                             ),
                           ),
                         ],
@@ -174,28 +203,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.blue),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
